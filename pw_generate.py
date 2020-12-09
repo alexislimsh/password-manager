@@ -10,22 +10,56 @@ def encrypt_password(password):
 def check_encrypted_password(password, hashed):
     return pwd_context.verify(password, hashed)
 
-def input_master():
-    master = input("What is the master password?")
-    return master
+def input_details(field='identifer'):
+    answer = ""
+    if field == 'master_pw':
+        while len(answer) < 3:
+            answer = input("What is the master password? (min 3 characters) ")
 
-def input_website():
-    website = ""
-    while len(website) < 3:
-        website = input("What is the website name (lowercase, min 3 characters)?")
-    return website
+    elif field == 'platform':
+        while len(answer) < 3:
+            answer = input("What is the platform name? (lowercase, min 3 characters) ")
 
-def input_username():
-    username = input("What is the username/email associated?")
-    return username
+    elif field == 'identifier':
+        while len(answer) < 3:
+            answer = input("REQUIRED: Please enter a unique identifier for the database (min 3 chars) ")
+
+    elif field == 'username':
+        while len(answer) < 5:
+            answer = input("What is the username/email? (min 5 characters) ")
+
+    elif field == 'additional':
+        answer = input('OPTIONAL: Please give an additional hash changer. ')
+
+    else:
+        print("Error, input field is wrong.")
+    
+    return "'" + answer + "'"
+
+
+# def input_master():
+#     master = 
+#     return master
+
+# def input_website():
+    
+#     return website
+
+# def input_identifier():
+#     identifier = ""
+#     while len(identifier) <
+
+# def input_username():
+#     username = ""
+#     while len(username) < 5:
+#         username = input("What is the username/email associated? (min 5 characters)")
+#     return username
 
 def create_password(string_to_hash):
     encrypted = encrypt_password(string_to_hash)
     string_to_replace = "$5$rounds=80000$" + app_salt + "$"
     encrypted_replaced = encrypted.replace(string_to_replace, "")
     return encrypted_replaced
+
+
+
