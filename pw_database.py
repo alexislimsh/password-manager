@@ -19,6 +19,7 @@ def db_connection():
 conn = db_connection()
 cursor = conn.cursor()
 
+# Display and query functions
 def display_table(headers, rows):
     table = PrettyTable()
     table.field_names = headers
@@ -34,6 +35,7 @@ def display_query(query):
     headers = [cn[0] for cn in cursor.description]
     display_table(headers, rows)
 
+# Create and alter table
 def create_table():
     
     query = '''
@@ -41,9 +43,18 @@ def create_table():
                                          date_created TEXT,
                                          platform TEXT, 
                                          username TEXT,
-                                         additional TEXT);
+                                         additional TEXT,
+                                         notes TEXT);
     '''
     cursor.execute(query)
+    conn.commit()
+
+def alter_table():
+    query = '''
+    ALTER TABLE passwords
+    ADD COLUMN notes TEXT
+     '''
+    execute_query(query)
     conn.commit()
 
 # Show entire database - provide no. of rows
@@ -56,10 +67,11 @@ def show_database(nrows=5):
     display_query(query)
 
 # Create password and store
-def create_entry(identifier, platform, username, additional):
+
+def create_entry(identifier, platform, username, additional, notes):
     created_date = "'" + date.today().strftime('%d/%m/%Y') + "'"
     query = f'''
-    INSERT INTO passwords VALUES({identifier}, {created_date}, {platform}, {username}, {additional})
+    INSERT INTO passwords VALUES({identifier}, {created_date}, {platform}, {username}, {additional}, {notes})
     '''
     
     cursor.execute(query)
@@ -83,16 +95,57 @@ def find_all(field = 1):
     '''
     display_query(query)
 
+# Update and delete entries
+def update_entry(identifier, field):
+    
+    field_dict = {1: 'username', 2: 'additional', 3: 'notes'}
+    field_v = field_dict[field]
 
-# Execute custom SQL query?
+    print('The current value is:')
 
-# Find password - need to check for the username
+    query = f'''
+    SELECT {field_v} FROM passwords WHERE identifier = {identifier}
+    '''
+    display_query(query)
+
+    new_val = '"' + input('Please enter the new value: ') + '"'
+
+    query = f'''
+    UPDATE passwords
+    SET {field_v} = {new_val}
+    WHERE
+    identifier = {identifier}
+    '''
+    execute_query(query)
+    conn.commit()
+
+    print(f'The entry for {identifier} has been updated.')
+
+    query = f'''
+    SELECT * FROM passwords WHERE identifier = {identifier}
+    '''
+    
+    display_query(query)
 
 
-    # What is the website?
+def delete_entry(identifier):
+    print(f'Are you sure you want to delete the entry for {identifier}?')
+    double_check = input(f'Please enter {identifier} to confirm: ')
+    
+    while double_check != identifier.replace('"', ''):
+        double_check = input(f'Wrong! Please enter {identifier} to confirm or enter N to return: ')
+        if double_check == '"N"':
+            return
+    
+    query = f'''
+    DELETE FROM passwords
+    WHERE identifier = {identifier}
+    '''
+    execute_query(query)
+    conn.commit()
 
+    print(f'The entry for {identifier} has been deleted.')
 
-# Change password - should we add a unique hash changer?
 
 
 

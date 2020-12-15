@@ -30,11 +30,14 @@ def input_details(field='identifer'):
 
     elif field == 'additional':
         answer = input('OPTIONAL: Please give an additional hash changer. ')
+    
+    elif field == 'notes':
+        answer = input('OPTIONAL: Please add any notes for the entry.  ')
 
     else:
         print("Error, input field is wrong.")
     
-    return "'" + answer + "'"
+    return '"' + answer + '"'
 
 
 # def input_master():

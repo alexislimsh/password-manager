@@ -5,14 +5,7 @@ from datetime import date
 import pyperclip
 
 from pw_generate import input_details, create_password
-from pw_database import db_connection, create_entry, find_all, display_query, execute_query, show_database
-
-# Open the password dictionary
-# try:
-#     pw_dict = pickle.load( open( "passwords.pkl", "rb" ) )
-# except:
-#     print('First-time user. Creating an empty dictionary.')
-#     pw_dict = {}
+from pw_database import db_connection, create_entry, find_all, display_query, execute_query, show_database, update_entry, delete_entry
 
 #conn = db_connection()
 #cursor = conn.cursor()
@@ -24,7 +17,8 @@ def menu():
     print('2. List all platforms, usernames or identifiers')
     print('3. Find your login / password details for a platform')
     print('4. Show n number of rows')
-    print('5. Custom search with SQL')
+    print('5. Update/delete an entry')
+    print('6. Custom search with SQL')
     print('Q. Exit')
     print('-'*30)
     return input(': ')
@@ -37,7 +31,6 @@ def create_and_store():
     
     existing_ids = [val[0] for val in execute_query(query)]
 
-
     # Get details of the platform, unique identifier, master password and username/email
     platform = input_details('platform')
     identifier = input_details('identifier')
@@ -47,26 +40,14 @@ def create_and_store():
     master = input_details('master_pw')
     username = input_details('username')
     additional = input_details('additional')
+    notes = input_details('notes')
 
     # Create password
     combined = master + "_" + platform + "_" + username + additional
     encrypted = create_password(combined)
     
     # Store details in database
-    create_entry(identifier, platform, username, additional)
-
-    """ The code block below is from the dictionary version """
-    # Create a dict to store pw details
-    # new_entry = {}
-
-    # Store password details
-    # new_entry['username'] = username
-    # new_entry['time_created'] = date.today()
-    # new_entry['website'] = website
-    
-    # # Create new entry in passwords dictionary, save the new passwords dictionary
-    # pw_dict[website] = new_entry
-    # pickle.dump(pw_dict, open( "passwords.pkl", "wb" ) )
+    create_entry(identifier, platform, username, additional, notes)
 
     # Return the password
     pyperclip.copy(encrypted)
@@ -118,52 +99,52 @@ def find_entries():
 # Option 4
 
 def view_db():
-    nrows = int(input('How many rows do you want to display?'))
-    while nrows <=0:
-        nrows = int(input('How many rows do you want to display?'))
+    check = True
     
+    while check == True:
+        nrows = input('How many rows do you want to display?')
+        try: 
+            nrows = int(nrows)
+            if nrows > 0:
+                check = False
+            else: 
+                print('Please try again.)
+        except:
+            print('Please try again.')
     
     show_database(nrows)
 
-# Option 5
+def update_or_delete():
+    print(('-'*3) + 'What would you like to do?'+ ('-' *3))
+    print('1. Update entry')
+    print('2. Delete entry')
+    step = int(input(": "))
+    
+    while step not in (1, 2):
+        step = int(input(": "))
+
+    if step == 1:
+        identifier = '"' + input('Please enter the unique identifier for the entry: ') + '"'
+        print(('-'*3) + 'What would you like to update?'+ ('-' *3))
+        print('1. Username')
+        print('2. Additional hash')
+        print('3. Notes')
+        field = int(input(': '))
+        while field not in (1, 2, 3):
+            field = int(input(': '))
+
+        update_entry(identifier, field)
+    else:
+        identifier = '"' + input('Please enter the unique identifier for the entry: ') + '"'
+        delete_entry(identifier)
+
+
+# Option 6
 def custom_search():
-    query = input('Please enter a valid SQL query')
+    query = input('Please enter a valid SQL query: ')
     print(('-'*5) + 'Displaying query results' + ('-'*5))
     display_query(query)
 
-# Option 2
-# def find_platforms_user():
-#     username = input_details('username')
-#     query = f'''SELECT DISTINCT platform FROM passwords WHERE username = {username}
-#     '''
-#     display_query(query)
-#     results = []
-#     username = input_details('username')
-
-#     for k,v in pw_dict.items():
-#         if v['username'] == username:
-#             results.append(k)
-#     if len(results) == 0:
-#         print("Error. No such entry")
-#     else:
-#         print(results)
-
-# Option 3
-# def find_password():
-#     platform = input_details('platform')
-    
-#     # What is the website?
-#     # What is the username? 
-    
-#     try:
-#         username = pw_dict[website]['username']
-#         master = input_master()
-#         combined = master + "_" + website + "_" + username
-#         encrypted = create_password(combined)
-#         print(('-'*3) + 'This is your password:' + ('-'*3))
-#         print(encrypted)
-#     except:
-#         print("Error. No such entry")
 
 
 
